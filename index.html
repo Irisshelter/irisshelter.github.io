@@ -177,6 +177,9 @@ section{padding:120px 6vw;position:relative}
   transform: translate(-50%, -50%);
   animation: orbit-spin 60s linear infinite;
 }
+.orbit:hover {
+  animation-play-state: paused;
+}
 @keyframes orbit-spin {
   from { transform: translate(-50%, -50%) rotate(0deg); }
   to { transform: translate(-50%, -50%) rotate(360deg); }
