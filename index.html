@@ -339,8 +339,8 @@ footer .heart{color:var(--cyan)}
 .modal-links{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
 .modal-links a{font-size:.88rem}
 
-.reveal{opacity:0;transform:translateY(30px);transition:.7s cubic-bezier(.2,.8,.2,1)}
-.reveal.in{opacity:1;transform:none}
+.js .reveal{opacity:0;transform:translateY(30px);transition:.7s cubic-bezier(.2,.8,.2,1)}
+.js .reveal.in{opacity:1;transform:none}
 
 @media(max-width:860px){
   .hero-grid,.about-grid{grid-template-columns:1fr;gap:40px}
@@ -659,6 +659,28 @@ footer .heart{color:var(--cyan)}
 
 <script>
 /* ===== 项目数据 ===== */
+/* ===== 滚动动效（渐进增强：JS 或 IntersectionObserver 失败时，内容直接可见）===== */
+var io = null;
+try{
+  io = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if(en.isIntersecting){
+        en.target.classList.add('in');
+        io.unobserve(en.target);
+      }
+    });
+  }, {threshold:.12});
+}catch(e){ io = null; }
+if(io){ document.documentElement.classList.add('js'); }
+function observe(){
+  if(!io){
+    document.querySelectorAll('.reveal:not(.in)').forEach(el => el.classList.add('in'));
+    return;
+  }
+  document.querySelectorAll('.reveal:not(.in)').forEach(el => io.observe(el));
+}
+observe();
+
 const projects = [
   {
     title:"知简 · 简历智能诊断 Agent",
@@ -765,19 +787,7 @@ let timer = setInterval(() => go(cur+1), 6000);
 document.querySelector('.slides-wrap').onmouseenter = () => clearInterval(timer);
 document.querySelector('.slides-wrap').onmouseleave = () => timer = setInterval(() => go(cur+1), 6000);
 
-/* ===== 滚动动效 ===== */
-const io = new IntersectionObserver(entries => {
-  entries.forEach(en => {
-    if(en.isIntersecting){
-      en.target.classList.add('in');
-      io.unobserve(en.target);
-    }
-  });
-}, {threshold:.12});
-function observe(){
-  document.querySelectorAll('.reveal:not(.in)').forEach(el => io.observe(el));
-}
-observe();
+/* ===== 滚动动效引擎已在脚本前段初始化（io / observe）=====
 
 const navbar = document.getElementById('navbar');
 let fired = false;
