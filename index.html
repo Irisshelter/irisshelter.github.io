@@ -1,11 +1,517 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <meta charset="utf-8">
-    <title>我的作品集</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>刘宗恒 · 个人作品集</title>
+<style>
+:root{
+  --bg-0:#070b14;
+  --bg-1:#0b1120;
+  --bg-2:#0f1830;
+  --line:rgba(120,160,255,.14);
+  --txt:#e8edf7;
+  --txt-dim:#8ea0c4;
+  --brand:#4da3ff;
+  --brand-2:#38e1c4;
+  --grad:linear-gradient(135deg,#4da3ff 0%,#38e1c4 100%);
+  --mono:'JetBrains Mono','Fira Code','SF Mono',Consolas,monospace;
+  --sans:'Inter','PingFang SC','Microsoft YaHei','WenQuanYi Micro Hei',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--sans);
+  background:var(--bg-0);
+  color:var(--txt);
+  line-height:1.7;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+/* ===== 全局网格背景 ===== */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(1200px 600px at 80% -10%,rgba(77,163,255,.10),transparent 60%),
+    radial-gradient(900px 500px at -10% 30%,rgba(56,225,196,.07),transparent 55%),
+    linear-gradient(rgba(120,160,255,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(120,160,255,.035) 1px,transparent 1px);
+  background-size:auto,auto,56px 56px,56px 56px;
+}
+/* ===== 噪点蒙版 ===== */
+body::after{
+  content:'';position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.03;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.wrap{position:relative;z-index:2}
+
+/* ===== 导航 ===== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  backdrop-filter:blur(14px);
+  background:rgba(7,11,20,.72);
+  border-bottom:1px solid var(--line);
+  transition:.3s;
+}
+nav .inner{max-width:1180px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:var(--mono);font-size:15px;letter-spacing:.5px}
+.logo b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700}
+.logo span{color:var(--txt-dim);margin-left:6px}
+.links{display:flex;gap:6px;align-items:center}
+.links a{
+  font-family:var(--mono);font-size:13px;color:var(--txt-dim);
+  text-decoration:none;padding:6px 14px;border-radius:8px;transition:.25s;
+}
+.links a:hover{color:var(--txt);background:rgba(120,160,255,.08)}
+.links a::before{content:'';display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--brand);margin-right:8px;opacity:.5;transition:.25s}
+.links a:hover::before{opacity:1}
+.menu-btn{display:none;background:none;border:none;color:var(--txt);font-size:22px;cursor:pointer}
+
+/* ===== Hero ===== */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;padding:120px 32px 80px}
+.hero-inner{max-width:1180px;width:100%;display:grid;grid-template-columns:1.15fr .85fr;gap:64px;align-items:center}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:var(--mono);font-size:12.5px;color:var(--brand-2);
+  border:1px solid rgba(56,225,196,.25);border-radius:999px;padding:6px 16px;margin-bottom:28px;
+  background:rgba(56,225,196,.05);
+}
+.eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--brand-2);box-shadow:0 0 10px var(--brand-2);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+h1{font-size:clamp(40px,6vw,72px);line-height:1.05;font-weight:800;letter-spacing:-1.5px;margin-bottom:22px}
+h1 .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+h1 .cursor{display:inline-block;width:4px;height:.85em;background:var(--brand);margin-left:6px;vertical-align:-.08em;animation:blink 1s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+.sub{font-size:17.5px;color:var(--txt-dim);max-width:520px;margin-bottom:36px}
+.cta-row{display:flex;gap:14px;flex-wrap:wrap}
+.btn{
+  font-family:var(--mono);font-size:14px;text-decoration:none;
+  padding:13px 26px;border-radius:10px;border:1px solid var(--line);
+  color:var(--txt);background:rgba(120,160,255,.05);transition:.3s;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
+}
+.btn:hover{transform:translateY(-2px);border-color:rgba(77,163,255,.5);background:rgba(77,163,255,.1)}
+.btn.primary{background:var(--grad);border-color:transparent;color:#04121f;font-weight:700}
+.btn.primary:hover{box-shadow:0 8px 30px rgba(77,163,255,.35);color:#04121f}
+.stats{display:flex;gap:44px;margin-top:52px}
+.stat .num{font-family:var(--mono);font-size:26px;font-weight:700;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat .lbl{font-size:12.5px;color:var(--txt-dim);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+
+/* ===== Hero 卡片 ===== */
+.glass{
+  position:relative;border-radius:20px;padding:1px;
+  background:linear-gradient(160deg,rgba(77,163,255,.4),rgba(56,225,196,.12) 40%,rgba(255,255,255,.02));
+}
+.glass-in{
+  border-radius:19px;background:rgba(11,17,32,.86);backdrop-filter:blur(12px);
+  padding:26px;
+}
+.terminal{font-family:var(--mono);font-size:13px}
+.term-head{display:flex;align-items:center;gap:6px;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.term-head i{width:11px;height:11px;border-radius:50%;display:block}
+.term-head i:nth-child(1){background:#ff5f57}
+.term-head i:nth-child(2){background:#febc2e}
+.term-head i:nth-child(3){background:#28c840}
+.term-head span{margin-left:10px;color:var(--txt-dim);font-size:12px}
+.term-body .ln{margin-bottom:10px;color:var(--txt-dim)}
+.term-body .ln .p{color:var(--brand-2)}
+.term-body .ln .c{color:#7b8499}
+.term-body .ln .k{color:var(--brand)}
+.prog{margin-top:22px}
+.prog-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--txt-dim);margin-bottom:7px}
+.bar{height:5px;border-radius:6px;background:rgba(120,160,255,.1);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:6px;background:var(--grad);width:0;transition:width 1.6s cubic-bezier(.2,.8,.2,1)}
+.tag-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.tag{font-family:var(--mono);font-size:11.5px;color:var(--txt-dim);border:1px solid var(--line);border-radius:6px;padding:4px 10px;transition:.25s}
+.tag:hover{color:var(--brand-2);border-color:rgba(56,225,196,.4);transform:translateY(-2px)}
+
+/* ===== 通用区块 ===== */
+section{padding:110px 32px;position:relative}
+.container{max-width:1180px;margin:0 auto}
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:56px;flex-wrap:wrap}
+.sec-title{display:flex;align-items:center;gap:16px}
+.sec-title .num{font-family:var(--mono);font-size:14px;color:var(--brand)}
+.sec-title h2{font-size:clamp(26px,3.6vw,40px);font-weight:800;letter-spacing:-.8px}
+.sec-desc{color:var(--txt-dim);font-size:14.5px;max-width:340px}
+.card{
+  position:relative;border-radius:18px;padding:1px;
+  background:linear-gradient(160deg,rgba(120,160,255,.18),rgba(255,255,255,.01) 50%,rgba(56,225,196,.1));
+  transition:.5s;
+}
+.card:hover{transform:translateY(-6px)}
+.card-in{
+  border-radius:17px;background:linear-gradient(160deg,rgba(15,24,48,.9),rgba(11,17,32,.94));
+  padding:34px;
+}
+
+/* ===== About ===== */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px}
+.about-grid p{color:var(--txt-dim);font-size:15.5px;margin-bottom:16px}
+.info-list{list-style:none}
+.info-list li{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.info-list li span:first-child{color:var(--txt-dim);font-family:var(--mono);font-size:13px}
+.info-list li span:last-child{color:var(--txt)}
+
+/* ===== Projects ===== */
+.filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:40px}
+.filter button{
+  font-family:var(--mono);font-size:13px;cursor:pointer;
+  padding:8px 18px;border-radius:8px;border:1px solid var(--line);
+  background:transparent;color:var(--txt-dim);transition:.25s;
+}
+.filter button:hover{color:var(--txt)}
+.filter button.active{background:var(--grad);border-color:transparent;color:#04121f;font-weight:700}
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:28px}
+.proj{display:flex;flex-direction:column;height:100%}
+.proj-top{
+  position:relative;height:150px;border-radius:12px;overflow:hidden;margin-bottom:22px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--bg-2);
+}
+.proj-top .bg{position:absolute;inset:0;opacity:.5;transition:.6s}
+.proj:hover .proj-top .bg{transform:scale(1.12);opacity:.75}
+.proj-top .ico{position:relative;font-family:var(--mono);font-size:13px;color:var(--txt-dim);z-index:2}
+.proj h3{font-size:20px;margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.proj h3 .arrow{opacity:0;transform:translateX(-6px);transition:.3s;color:var(--brand)}
+.proj:hover h3 .arrow{opacity:1;transform:translateX(0)}
+.proj p{color:var(--txt-dim);font-size:14.5px;margin-bottom:20px;flex:1}
+.proj-foot{display:flex;justify-content:space-between;align-items:center;padding-top:18px;border-top:1px solid var(--line)}
+.proj-foot .tags{display:flex;gap:6px;flex-wrap:wrap}
+.proj-foot .tags em{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--brand-2);border:1px solid rgba(56,225,196,.25);border-radius:5px;padding:3px 8px}
+.proj-foot a{font-family:var(--mono);font-size:12.5px;color:var(--txt-dim);text-decoration:none;transition:.25s}
+.proj-foot a:hover{color:var(--brand)}
+
+/* ===== Skills ===== */
+.skill-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:20px}
+.skill{
+  text-align:center;padding:28px 18px;border-radius:14px;
+  background:rgba(120,160,255,.03);border:1px solid var(--line);transition:.35s;
+}
+.skill:hover{background:rgba(77,163,255,.08);border-color:rgba(77,163,255,.35);transform:translateY(-4px)}
+.skill .ic{font-family:var(--mono);font-size:22px;font-weight:700;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:10px}
+.skill .nm{font-size:14px;font-weight:600}
+.skill .lv{font-family:var(--mono);font-size:11px;color:var(--txt-dim);margin-top:6px}
+
+/* ===== Timeline ===== */
+.tl{position:relative;padding-left:36px}
+.tl::before{content:'';position:absolute;left:7px;top:6px;bottom:6px;width:1px;background:linear-gradient(var(--brand),transparent)}
+.tl-item{position:relative;padding-bottom:38px}
+.tl-item::before{content:'';position:absolute;left:-33px;top:6px;width:13px;height:13px;border-radius:50%;background:var(--bg-0);border:2px solid var(--brand);box-shadow:0 0 0 4px rgba(77,163,255,.08)}
+.tl-item .y{font-family:var(--mono);font-size:12.5px;color:var(--brand-2);margin-bottom:4px}
+.tl-item h4{font-size:18px;margin-bottom:6px}
+.tl-item p{color:var(--txt-dim);font-size:14.5px}
+
+/* ===== Contact ===== */
+.contact-box{text-align:center;padding:70px 40px}
+.contact-box h2{font-size:clamp(28px,4vw,46px);font-weight:800;letter-spacing:-1px;margin-bottom:18px}
+.contact-box p{color:var(--txt-dim);max-width:520px;margin:0 auto 34px}
+.contact-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+/* ===== Footer ===== */
+footer{border-top:1px solid var(--line);padding:34px 32px;position:relative;z-index:2}
+footer .inner{max-width:1180px;margin:0 auto;display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;font-family:var(--mono);font-size:12.5px;color:var(--txt-dim)}
+
+/* ===== 动画 ===== */
+.reveal{opacity:0;transform:translateY(28px);transition:.8s cubic-bezier(.2,.8,.2,1)}
+.reveal.in{opacity:1;transform:none}
+@media(max-width:860px){
+  .hero-inner{grid-template-columns:1fr;gap:40px}
+  .about-grid{grid-template-columns:1fr}
+  .links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;background:rgba(7,11,20,.96);border-bottom:1px solid var(--line);padding:12px}
+  .links.open{display:flex}
+  .menu-btn{display:block}
+  section{padding:80px 22px}
+  .stats{gap:28px}
+}
+</style>
 </head>
 <body>
-    <h1>欢迎来到我的作品集！</h1>
-    <p>这里是刘宗恒的项目集。</p>
+<div class="wrap">
+
+<!-- ===== NAV ===== -->
+<nav id="nav">
+  <div class="inner">
+    <div class="logo"><b>IRIS</b><span>// portfolio</span></div>
+    <div class="links" id="links">
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#projects">Projects</a>
+      <a href="#skills">Skills</a>
+      <a href="#journey">Journey</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <button class="menu-btn" id="menuBtn">☰</button>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="home">
+  <div class="hero-inner">
+    <div class="reveal">
+      <div class="eyebrow"><span class="dot"></span>AVAILABLE FOR NEW OPPORTUNITIES</div>
+      <h1>你好，我是 <span class="grad">刘宗恒</span><span class="cursor"></span></h1>
+      <p class="sub">热爱技术、追求极致体验。这里收录了我持续打磨的项目、踩过的坑与一路成长。保持好奇，持续构建。</p>
+      <div class="cta-row">
+        <a class="btn primary" href="#projects">查看作品 →</a>
+        <a class="btn" href="#contact">取得联系</a>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="num" data-count="12">0</div><div class="lbl">Projects</div></div>
+        <div class="stat"><div class="num" data-count="3">0</div><div class="lbl">Years Coding</div></div>
+        <div class="stat"><div class="num" data-count="99">0</div><div class="lbl">Commits</div></div>
+      </div>
+    </div>
+
+    <div class="glass reveal">
+      <div class="glass-in terminal">
+        <div class="term-head"><i></i><i></i><i></i><span>~/portfolio — iris</span></div>
+        <div class="term-body">
+          <div class="ln"><span class="p">$</span> <span class="k">whoami</span></div>
+          <div class="ln"><span class="c">> 刘宗恒 / 学生开发者 / 持续学习者</span></div>
+          <div class="ln"><span class="p">$</span> <span class="k">cat ./skills.txt</span></div>
+          <div class="ln"><span class="c">> Python · JavaScript · Git · HTML/CSS</span></div>
+          <div class="ln"><span class="p">$</span> <span class="k">./deploy.sh</span></div>
+          <div class="ln"><span class="c">> Deploying portfolio...</span></div>
+        </div>
+        <div class="prog">
+          <div class="prog-label"><span>learning.progress</span><span class="pct">0%</span></div>
+          <div class="bar"><i data-w="88"></i></div>
+        </div>
+        <div class="tag-row">
+          <span class="tag">#Python</span>
+          <span class="tag">#JavaScript</span>
+          <span class="tag">#Open Source</span>
+          <span class="tag">#Design</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ABOUT ===== -->
+<section id="about">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-title"><span class="num">01.</span><h2>关于我</h2></div>
+      <p class="sec-desc">不止于写代码，更在意把事情做完整、做漂亮。</p>
+    </div>
+    <div class="about-grid">
+      <div class="card reveal"><div class="card-in">
+        <p>我是刘宗恒，一名对技术与设计都保持热情的学生开发者。喜欢从零搭建项目，也享受在细节里反复打磨的过程。</p>
+        <p>我相信好的作品不需要多余的解释——代码即表达，页面即态度。这份作品集记录了我从入门到现在的每一次尝试。</p>
+        <p>目前持续学习前端、Python 与开源协作，期待与有趣的人和项目相遇。</p>
+      </div></div>
+      <div class="card reveal"><div class="card-in">
+        <ul class="info-list">
+          <li><span>NAME</span><span>刘宗恒 / Iris</span></li>
+          <li><span>ROLE</span><span>Student Developer</span></li>
+          <li><span>FOCUS</span><span>Web · Python · Design</span></li>
+          <li><span>LOCATION</span><span>China</span></li>
+          <li><span>EMAIL</span><span>your@email.com</span></li>
+          <li><span>STATUS</span><span style="color:var(--brand-2)">● Open to work</span></li>
+        </ul>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PROJECTS ===== -->
+<section id="projects">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-title"><span class="num">02.</span><h2>项目作品</h2></div>
+      <p class="sec-desc">点击分类筛选，卡片可悬停交互。</p>
+    </div>
+    <div class="filter reveal">
+      <button class="active" data-f="all">全部</button>
+      <button data-f="web">Web</button>
+      <button data-f="python">Python</button>
+      <button data-f="tool">工具</button>
+    </div>
+    <div class="proj-grid">
+
+      <div class="card proj reveal" data-cat="web">
+        <div class="card-in" style="display:flex;flex-direction:column;height:100%">
+          <div class="proj-top"><div class="bg" style="background:linear-gradient(135deg,#4da3ff,#38e1c4)"></div><span class="ico">// web</span></div>
+          <h3>个人作品集站点 <span class="arrow">→</span></h3>
+          <p>你正在浏览的页面。纯 HTML/CSS/JS 打造，零依赖、自适应、带交互动效的单页作品集。</p>
+          <div class="proj-foot">
+            <div class="tags"><em>HTML</em><em>CSS</em><em>JS</em></div>
+            <a href="#">源码 ↗</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card proj reveal" data-cat="python">
+        <div class="card-in" style="display:flex;flex-direction:column;height:100%">
+          <div class="proj-top"><div class="bg" style="background:linear-gradient(135deg,#38e1c4,#7c5cff)"></div><span class="ico">// py</span></div>
+          <h3>数据可视化小工具 <span class="arrow">→</span></h3>
+          <p>用 Python 处理数据并生成可视化图表，支持导出报告，提升分析效率。</p>
+          <div class="proj-foot">
+            <div class="tags"><em>Python</em><em>Matplotlib</em></div>
+            <a href="#">源码 ↗</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card proj reveal" data-cat="tool">
+        <div class="card-in" style="display:flex;flex-direction:column;height:100%">
+          <div class="proj-top"><div class="bg" style="background:linear-gradient(135deg,#ff7a59,#ffd23f)"></div><span class="ico">// tool</span></div>
+          <h3>效率工具集 <span class="arrow">→</span></h3>
+          <p>日常学习中沉淀的各类小工具合集，解决重复劳动，自动化常见流程。</p>
+          <div class="proj-foot">
+            <div class="tags"><em>CLI</em><em>Automation</em></div>
+            <a href="#">源码 ↗</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card proj reveal" data-cat="web">
+        <div class="card-in" style="display:flex;flex-direction:column;height:100%">
+          <div class="proj-top"><div class="bg" style="background:linear-gradient(135deg,#7c5cff,#4da3ff)"></div><span class="ico">// web</span></div>
+          <h3>待补充项目 <span class="arrow">→</span></h3>
+          <p>把你的项目标题、简介和链接替换到这里即可。保持三句话以内，突出亮点。</p>
+          <div class="proj-foot">
+            <div class="tags"><em>TODO</em></div>
+            <a href="#">查看 ↗</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== SKILLS ===== -->
+<section id="skills">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-title"><span class="num">03.</span><h2>技术栈</h2></div>
+      <p class="sec-desc">悬停卡片查看熟练度，持续更新中。</p>
+    </div>
+    <div class="skill-grid">
+      <div class="skill reveal"><div class="ic">&lt;/&gt;</div><div class="nm">HTML / CSS</div><div class="lv">熟练</div></div>
+      <div class="skill reveal"><div class="ic">JS</div><div class="nm">JavaScript</div><div class="lv">熟练</div></div>
+      <div class="skill reveal"><div class="ic">py</div><div class="nm">Python</div><div class="lv">熟练</div></div>
+      <div class="skill reveal"><div class="ic">⚙</div><div class="nm">Git / GitHub</div><div class="lv">熟练</div></div>
+      <div class="skill reveal"><div class="ic">UI</div><div class="nm">UI Design</div><div class="lv">了解</div></div>
+      <div class="skill reveal"><div class="ic">{}</div><div class="nm">数据结构</div><div class="lv">学习中</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== JOURNEY ===== -->
+<section id="journey">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-title"><span class="num">04.</span><h2>成长轨迹</h2></div>
+      <p class="sec-desc">每一个节点，都是一次主动的选择。</p>
+    </div>
+    <div class="tl">
+      <div class="tl-item reveal"><div class="y">2026</div><h4>搭建个人作品集</h4><p>用 GitHub Pages 部署首个个人站点，系统整理过往项目。</p></div>
+      <div class="tl-item reveal"><div class="y">2025</div><h4>深入 Python 与自动化</h4><p>开始用 Python 解决实际问题，积累工具脚本与可视化经验。</p></div>
+      <div class="tl-item reveal"><div class="y">2024</div><h4>接触 Web 开发</h4><p>学习 HTML/CSS/JS，完成第一个可交互网页项目。</p></div>
+      <div class="tl-item reveal"><div class="y">2023</div><h4>编程启蒙</h4><p>写下第一行代码，确定方向，持续自学至今。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CONTACT ===== -->
+<section id="contact">
+  <div class="container">
+    <div class="card reveal"><div class="card-in contact-box">
+      <h2>让我们一起 <span class="grad">做点什么</span></h2>
+      <p>无论是合作机会、技术交流，还是单纯想打个招呼，都欢迎随时联系我。</p>
+      <div class="contact-row">
+        <a class="btn primary" href="mailto:your@email.com">✉ 发邮件给我</a>
+        <a class="btn" href="https://github.com/iris191076" target="_blank">GitHub ↗</a>
+      </div>
+    </div></div>
+  </div>
+</section>
+
+<footer>
+  <div class="inner">
+    <span>© 2026 刘宗恒 · Built with passion &amp; vanilla HTML/CSS/JS</span>
+    <span>iris191076.github.io</span>
+  </div>
+</footer>
+
+</div>
+
+<script>
+// 移动端菜单
+const menuBtn=document.getElementById('menuBtn'),links=document.getElementById('links');
+menuBtn.addEventListener('click',()=>links.classList.toggle('open'));
+links.addEventListener('click',e=>{if(e.target.tagName==='A')links.classList.remove('open')});
+
+// 导航滚动效果
+const nav=document.getElementById('nav');
+addEventListener('scroll',()=>{
+  nav.style.background=scrollY>40?'rgba(7,11,20,.9)':'rgba(7,11,20,.72)';
+});
+
+// 数字动画
+function animateCount(el){
+  const target=+el.dataset.count,dur=1600,st=performance.now();
+  function step(now){
+    const p=Math.min((now-st)/dur,1);
+    el.textContent=Math.floor(p*target);
+    if(p<1)requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+// 进度条
+function animateBar(el){
+  el.style.width=el.dataset.w+'%';
+  const pct=el.parentElement.previousElementSibling.querySelector('.pct');
+  let w=0,target=+el.dataset.w;
+  const id=setInterval(()=>{w+=2;if(w>=target){w=target;clearInterval(id)}pct.textContent=w+'%';},24);
+}
+
+// 滚动出现
+const io=new IntersectionObserver(entries=>{
+  entries.forEach(en=>{
+    if(en.isIntersecting){
+      en.target.classList.add('in');
+      en.target.querySelectorAll('[data-count]').forEach(animateCount);
+      en.target.querySelectorAll('.bar i').forEach(animateBar);
+      io.unobserve(en.target);
+    }
+  });
+},{threshold:.15});
+document.querySelectorAll('.reveal,section').forEach(el=>io.observe(el));
+
+// 项目筛选
+document.querySelectorAll('.filter button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filter button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const f=btn.dataset.f;
+    document.querySelectorAll('.proj').forEach(card=>{
+      const show=(f==='all'||card.dataset.cat===f);
+      card.style.display=show?'':'none';
+      if(show){card.style.opacity='0';card.style.transform='translateY(16px)';requestAnimationFrame(()=>{setTimeout(()=>{card.style.transition='.5s';card.style.opacity='1';card.style.transform='';},30)})}
+    });
+  });
+});
+
+// 打字机标题
+const roles=['Student Developer','Python Lover','Design Enthusiast','Lifelong Learner'];
+let ri=0,ci=0,del=false,typing=true;
+const cursorSpan=document.querySelector('h1');
+function type(){
+  const el=document.querySelector('.eyebrow');
+  const base=el.firstElementChild.nextSibling;
+  const target=roles[ri];
+  if(del){
+    roles[ri]=target.slice(0,-1);
+    if(roles[ri].length===0){del=false;ri=(ri+1)%roles.length;roles[ri]=target.length?roles[ri]:'';ci=0}
+  }else{
+    roles[ri]=target.slice(0,++ci);
+    if(ci===target.length)del=true;
+  }
+  setTimeout(type,del?70:120);
+}
+</script>
 </body>
 </html>
