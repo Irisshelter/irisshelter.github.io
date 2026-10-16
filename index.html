@@ -790,27 +790,43 @@ document.querySelector('.slides-wrap').onmouseleave = () => timer = setInterval(
 /* ===== 滚动动效引擎已在脚本前段初始化（io / observe）=====
 
 const navbar = document.getElementById('navbar');
-let fired = false;
 window.addEventListener('scroll', () => {
   navbar.classList.toggle('scrolled', window.scrollY > 30);
-  if(!fired && window.scrollY > 200){
-    fired = true;
-    document.querySelectorAll('.num').forEach(n => {
-      const target = +n.dataset.count, step = Math.max(1, Math.ceil(target/40));
-      let cur = 0;
-      const t = setInterval(() => {
-        cur += step;
-        if(cur >= target){ cur = target; clearInterval(t); }
-        n.textContent = cur;
-      }, 30);
-    });
-    setTimeout(() => {
-      document.querySelectorAll('.bar-fill, .progress-fill').forEach(b => {
-        b.style.width = b.dataset.w + '%';
-      });
-    }, 400);
-  }
 }, {passive:true});
+
+/* ===== 进度条 + 数字计数：元素进入视口即触发（比 scrollY>200 更可靠，兼容内嵌滚动容器）===== */
+function countup(n){
+  if(n.dataset.done) return;
+  n.dataset.done = '1';
+  const target = +n.dataset.count, step = Math.max(1, Math.ceil(target/40));
+  let cur = 0;
+  const t = setInterval(() => {
+    cur += step;
+    if(cur >= target){ cur = target; clearInterval(t); }
+    n.textContent = cur;
+  }, 30);
+}
+function fillBar(el){
+  el.style.width = el.dataset.w + '%';
+}
+if('IntersectionObserver' in window){
+  const animIO = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if(!en.isIntersecting) return;
+      const el = en.target;
+      if(el.classList.contains('bar-fill') || el.classList.contains('progress-fill')){
+        setTimeout(() => fillBar(el), 300);
+      } else {
+        countup(el);
+      }
+      animIO.unobserve(el);
+    });
+  }, {threshold:.15});
+  document.querySelectorAll('.bar-fill, .progress-fill, .num').forEach(el => animIO.observe(el));
+} else {
+  document.querySelectorAll('.bar-fill, .progress-fill').forEach(fillBar);
+  document.querySelectorAll('.num').forEach(n => { n.textContent = n.dataset.count; });
+}
 
 /* ===== 能力星系 ===== */
 const SKILLS = [
