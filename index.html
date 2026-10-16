@@ -64,10 +64,10 @@ body{
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 .gradient-text{
-  background:linear-gradient(120deg,var(--cyan),var(--blue),var(--violet));
+  background:linear-gradient(120deg,var(--cyan),var(--blue),var(--violet),var(--blue),var(--cyan));
   background-size:200% 100%;
   -webkit-background-clip:text;background-clip:text;color:transparent;
-  animation:shine 6s linear infinite;
+  animation:shine 8s linear infinite;
 }
 @keyframes shine{to{background-position:200% 0}}
 .glass{
@@ -134,7 +134,7 @@ section{padding:120px 6vw;position:relative}
 .chip{font-family:var(--mono);font-size:.76rem;padding:5px 12px;border-radius:20px;background:rgba(59,130,246,.14);border:1px solid rgba(59,130,246,.35);color:#bfdbfe}
 .bar-row{display:flex;align-items:center;gap:12px;margin:10px 0 0 20px;font-family:var(--mono);font-size:.8rem}
 .bar-track{flex:1;height:6px;border-radius:6px;background:rgba(255,255,255,.1);overflow:hidden}
-.bar-fill{height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,var(--cyan),var(--blue),var(--violet));transition:width 1.6s cubic-bezier(.2,.8,.2,1)}
+.bar-fill{display:block;height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,var(--cyan),var(--blue),var(--violet));transition:width 1.6s cubic-bezier(.2,.8,.2,1)}
 
 .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
 .about-text h3{font-size:1.5rem;margin-bottom:20px;font-weight:700}
@@ -154,44 +154,22 @@ section{padding:120px 6vw;position:relative}
   display:flex;align-items:center;justify-content:center;
   perspective:1200px;
 }
-/* .orbit{
-  position:absolute;border:1px dashed var(--line);border-radius:50%;
-  top:50%;left:50%;transform:translate(-50%,-50%);
-  animation:spin 60s linear infinite;
-} */
-/* .orbit {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 100%;
-  height: 100%;
-  transform: translate(-50%, -50%);
-  animation: orbit-spin 60s linear infinite;
-} */
-.orbit {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 100%;
-  height: 100%;
-  transform: translate(-50%, -50%);
-  animation: orbit-spin 60s linear infinite;
-}
-.orbit:hover {
-  animation-play-state: paused;
-}
-@keyframes orbit-spin {
-  from { transform: translate(-50%, -50%) rotate(0deg); }
-  to { transform: translate(-50%, -50%) rotate(360deg); }
-}
-@keyframes orbit-spin {
-  from { transform: translate(-50%, -50%) rotate(0deg); }
-  to { transform: translate(-50%, -50%) rotate(360deg); }
+/* ===== 星系轨道：蓝紫渐变弧环，匀速环绕旋转 ===== */
+.orbit{
+  position:absolute;top:50%;left:50%;
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  background:conic-gradient(from 0deg,transparent 0deg 140deg,var(--cyan) 210deg,var(--blue) 260deg,var(--violet) 310deg,transparent 360deg);
+  -webkit-mask:radial-gradient(closest-side,transparent calc(100% - 2px),#000 calc(100% - 2px));
+  mask:radial-gradient(closest-side,transparent calc(100% - 2px),#000 calc(100% - 2px));
+  opacity:.5;
+  animation:orbit-spin 24s linear infinite;
+  will-change:transform;
 }
 .orbit.o1{width:336px;height:336px}
-.orbit.o2{width:600px;height:600px;animation-duration:90s;animation-direction:reverse}
-.orbit.o3{width:760px;height:760px;animation-duration:130s;border-style:dotted;opacity:.6}
-@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.orbit.o2{width:600px;height:600px;animation-duration:34s;animation-direction:reverse}
+.orbit.o3{width:760px;height:760px;animation-duration:52s;opacity:.28}
+@keyframes orbit-spin{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){
   .orbit{animation:none}
 }
@@ -203,7 +181,7 @@ section{padding:120px 6vw;position:relative}
 .core-ring{
   position:absolute;inset:0;border-radius:50%;
   background:conic-gradient(from 0deg,var(--cyan),var(--blue),var(--violet),var(--cyan));
-  animation:spin 5s linear infinite;
+  animation:core-spin 5s linear infinite;
   -webkit-mask:radial-gradient(circle,transparent 62%,#000 63%);
   mask:radial-gradient(circle,transparent 62%,#000 63%);
 }
@@ -212,6 +190,7 @@ section{padding:120px 6vw;position:relative}
   -webkit-mask:radial-gradient(circle,transparent 76%,#000 77%,#000 82%,transparent 83%);
   mask:radial-gradient(circle,transparent 76%,#000 77%,#000 82%,transparent 83%);
 }
+@keyframes core-spin{to{transform:rotate(360deg)}}
 .core-content{
   position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:4px;
   background:rgba(7,11,26,.72);backdrop-filter:blur(10px);border-radius:50%;
@@ -285,15 +264,8 @@ section{padding:120px 6vw;position:relative}
 .progress-item .top b{font-weight:600}
 .progress-item .top span{color:var(--cyan)}
 .progress-track{height:8px;border-radius:8px;background:rgba(255,255,255,.08);overflow:hidden}
-/* .progress-fill{height:100%;width:0;border-radius:8px;background:linear-gradient(90deg,var(--cyan),var(--blue),var(--violet));transition:width 1.6s cubic-bezier(.2,.8,.2,1)}
-@media(max-width:860px){.progress-list{grid-template-columns:1fr}} */
-.progress-fill, .bar-fill {
-  height: 100%;
-  width: 0%; /* 初始为0，由JS触发 */
-  background: linear-gradient(90deg, var(--cyan), var(--blue), var(--violet));
-  border-radius: 12px;
-  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
-}
+.progress-fill{display:block;height:100%;width:0;border-radius:8px;background:linear-gradient(90deg,var(--cyan),var(--blue),var(--violet));transition:width 1.6s cubic-bezier(.2,.8,.2,1)}
+@media(max-width:860px){.progress-list{grid-template-columns:1fr}}
 
 .projects-toolbar{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:40px}
 .filters{display:flex;gap:10px;flex-wrap:wrap}
