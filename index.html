@@ -154,10 +154,23 @@ section{padding:120px 6vw;position:relative}
   display:flex;align-items:center;justify-content:center;
   perspective:1200px;
 }
-.orbit{
+/* .orbit{
   position:absolute;border:1px dashed var(--line);border-radius:50%;
   top:50%;left:50%;transform:translate(-50%,-50%);
   animation:spin 60s linear infinite;
+} */
+.orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  animation: orbit-spin 60s linear infinite;
+}
+@keyframes orbit-spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 .orbit.o1{width:336px;height:336px}
 .orbit.o2{width:600px;height:600px;animation-duration:90s;animation-direction:reverse}
