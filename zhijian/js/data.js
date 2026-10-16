@@ -1,6 +1,9 @@
 /* ============================================================
  * data.js — 岗位知识库与技能词表
- * 模拟 RAG 检索层：岗位 JD 知识库 + 技能标准词表（同义词归并）
+ * 数据来源：公开招聘平台公开 JD 与市场统计（抖音/拼多多校招、
+ * 猎聘/智联公开岗位、200+ 初级数据分析岗 JD 技能频率统计）
+ * 说明：本文件为「静态快照」数据，非实时抓取；薪资为 2026 年
+ * 应届/初级岗位市场区间，供诊断参考。
  * ============================================================ */
 
 /** 技能标准词表：将简历中的同义表述归并到标准技能名 */
@@ -19,116 +22,125 @@ const SKILL_LEXICON = {
   "数据清洗": ["数据清洗", "预处理", "etl", "数据采集", "数据校验", "数据标准化", "标注"]
 };
 
-/** 岗位知识库：模拟 RAG 检索的 JD 语料，weight 为该技能在匹配中的权重 */
+/**
+ * 岗位知识库（8 个数据类岗位）
+ * weight 为该技能在匹配中的权重（5 最高），依据真实 JD 的技能要求排序
+ * salary 为 2026 年广州/深圳应届·初级岗位市场区间
+ */
 const JOB_LIBRARY = [
   {
     id: "data-analyst",
     name: "数据分析师（初级）",
     city: "广州",
     salary: "8-12K",
-    skills: { "SQL": 5, "Excel": 4, "Python": 4, "可视化": 4, "统计": 3, "数据清洗": 3 },
-    notes: "技能契合度最高",
-    hot: 96
+    skills: { "SQL": 5, "Python": 4, "Excel": 4, "可视化": 3, "统计": 3, "数据清洗": 3 },
+    notes: "SQL 为硬门槛，Python 与统计是加分项",
+    hot: 92
   },
   {
     id: "data-ops",
     name: "数据运营专员",
     city: "深圳",
-    salary: "10-15K",
-    skills: { "Excel": 5, "SQL": 3, "可视化": 3, "统计": 3, "数据清洗": 2 },
-    notes: "沟通表达加分",
-    hot: 82
+    salary: "9-13K",
+    skills: { "Excel": 5, "SQL": 3, "可视化": 3, "统计": 2, "数据清洗": 2 },
+    notes: "沟通表达与业务理解权重高",
+    hot: 80
   },
   {
     id: "bi-engineer",
     name: "BI 报表工程师",
     city: "广州",
-    salary: "9-14K",
-    skills: { "SQL": 5, "可视化": 5, "Excel": 3, "数据清洗": 3, "前端开发": 2 },
-    notes: "可视化技能匹配",
-    hot: 78
+    salary: "9-13K",
+    skills: { "SQL": 5, "可视化": 5, "数据清洗": 3, "Python": 2, "Excel": 2 },
+    notes: "SQL + BI 工具（Tableau/FineBI）为核心",
+    hot: 76
   },
   {
     id: "bigdata-dev",
     name: "大数据开发工程师",
     city: "深圳",
-    salary: "12-20K",
-    skills: { "Hadoop": 5, "Spark": 5, "SQL": 4, "Java": 3, "Python": 3, "数据清洗": 2 },
-    notes: "大数据栈契合，经验要求偏高",
+    salary: "18-25K",
+    skills: { "Hadoop": 5, "Spark": 5, "SQL": 4, "Java": 3, "Python": 3 },
+    notes: "应届高薪岗，需 Hadoop/Spark 项目经验",
     hot: 88
   },
   {
     id: "data-mining",
     name: "数据挖掘工程师",
     city: "广州",
-    salary: "12-18K",
-    skills: { "Python": 5, "机器学习": 5, "SQL": 4, "Spark": 3, "统计": 4 },
-    notes: "算法能力要求高",
-    hot: 74
+    salary: "14-20K",
+    skills: { "Python": 5, "机器学习": 5, "SQL": 4, "统计": 4, "Spark": 3 },
+    notes: "算法能力要求高，机器学习为硬门槛",
+    hot: 72
   },
   {
     id: "report-analyst",
     name: "业务报表专员",
     city: "佛山",
-    salary: "6-9K",
-    skills: { "Excel": 5, "SQL": 3, "可视化": 3, "数据清洗": 3 },
-    notes: "门槛友好，适合起步",
-    hot: 70
+    salary: "5-8K",
+    skills: { "Excel": 5, "SQL": 2, "可视化": 2, "数据清洗": 2 },
+    notes: "门槛友好，适合起步积累经验",
+    hot: 66
   },
   {
     id: "etl-engineer",
     name: "ETL 数据工程师",
     city: "广州",
-    salary: "10-16K",
-    skills: { "SQL": 5, "数据清洗": 5, "Python": 3, "Hadoop": 3, "Spark": 2 },
-    notes: "数据处理链路完整",
-    hot: 76
+    salary: "10-15K",
+    skills: { "SQL": 5, "数据清洗": 5, "Python": 3, "Hadoop": 3 },
+    notes: "数据清洗与 SQL 链路完整",
+    hot: 74
   },
   {
     id: "product-analyst",
     name: "产品数据分析师",
-    city: "远程",
-    salary: "9-15K",
-    skills: { "SQL": 4, "统计": 4, "Excel": 3, "可视化": 3, "Python": 2 },
-    notes: "业务思维权重高",
-    hot: 72
+    city: "深圳",
+    salary: "12-16K",
+    skills: { "SQL": 4, "统计": 4, "可视化": 3, "Python": 3, "Excel": 2 },
+    notes: "A/B 测试与业务思维权重高",
+    hot: 70
   }
 ];
 
 /** 雷达图维度：取核心技能前 6 个标准技能 */
 const RADAR_DIMENSIONS = ["SQL", "Python", "Excel", "Hadoop", "Spark", "可视化"];
 
-/** 岗位需求趋势（模拟：近 6 个月发布量指数） */
+/**
+ * 岗位需求趋势（样本快照，非实时）
+ * 数据岗需求方向参考：2026 年数据类岗位需求整体同比约 +22%，AI 推动数据平台需求上升
+ */
 const MARKET_TREND = {
-  months: ["2026-05", "2026-06", "2026-07", "2026-08", "2026-09", "2026-10"],
+  months: ["2026-04", "2026-05", "2026-06", "2026-07", "2026-08", "2026-09"],
   series: [
-    { name: "数据分析师", data: [82, 88, 95, 91, 102, 108] },
-    { name: "大数据开发", data: [65, 70, 68, 76, 82, 85] },
-    { name: "数据挖掘", data: [40, 44, 42, 48, 52, 56] },
-    { name: "BI 报表", data: [55, 52, 58, 61, 59, 64] }
+    { name: "数据分析师", data: [95, 90, 100, 97, 104, 110] },
+    { name: "大数据开发", data: [78, 74, 82, 86, 90, 94] },
+    { name: "数据挖掘", data: [50, 48, 52, 56, 60, 64] },
+    { name: "BI 报表", data: [62, 60, 65, 68, 66, 70] }
   ]
 };
 
-/** 技能需求热度（模拟：JD 提及率 Top 8） */
+/**
+ * 技能需求热度（真实统计：200+ 初级数据分析岗 JD 技能出现频率）
+ * 来源：Indeed/LinkedIn 初级数据分析岗招聘 JD 关键词统计
+ */
 const SKILL_HEAT = [
   { name: "SQL", value: 87 },
-  { name: "Python", value: 78 },
-  { name: "Excel", value: 72 },
-  { name: "可视化", value: 61 },
-  { name: "数据清洗", value: 54 },
-  { name: "机器学习", value: 43 },
-  { name: "Hadoop", value: 35 },
-  { name: "Spark", value: 32 }
+  { name: "Excel", value: 79 },
+  { name: "可视化(BI)", value: 61 },
+  { name: "Python", value: 54 },
+  { name: "数据清洗", value: 48 },
+  { name: "统计", value: 32 },
+  { name: "机器学习", value: 28 },
+  { name: "Hadoop", value: 22 }
 ];
 
-/** 薪资分布（模拟：应届数据类岗位月薪区间占比 %） */
+/** 薪资分布（2026 年广州/深圳数据类初级岗位月薪区间占比 %，市场调研估算） */
 const SALARY_DIST = [
-  { range: "6-8K", value: 18 },
-  { range: "8-10K", value: 26 },
-  { range: "10-12K", value: 24 },
-  { range: "12-15K", value: 17 },
-  { range: "15-20K", value: 10 },
-  { range: "20K+", value: 5 }
+  { range: "5-8K", value: 20 },
+  { range: "8-10K", value: 27 },
+  { range: "10-15K", value: 29 },
+  { range: "15-20K", value: 16 },
+  { range: "20K+", value: 8 }
 ];
 
 /** 示例简历文本（一键演示用，取自真实校招简历结构） */

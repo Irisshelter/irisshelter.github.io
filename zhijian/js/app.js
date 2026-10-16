@@ -649,12 +649,47 @@
     return div;
   }
 
+  /* ---- LLM 接入：初始化云服务客户端（免密钥中转） ---- */
+  let cloud = null;
+  let chatHistory = [];
+  try {
+    if (window.WorkBuddyCloud && window.CLOUD_CONFIG) {
+      cloud = window.WorkBuddyCloud.createWorkBuddyCloud({
+        endpoint: window.CLOUD_CONFIG.endpoint,
+        oauthRelayBaseUrl: window.CLOUD_CONFIG.oauthRelayBaseUrl,
+        publishableKey: window.CLOUD_CONFIG.publishableKey
+      });
+    }
+  } catch (e) { cloud = null; }
+
+  function setAgentStatus(text) {
+    const el = document.querySelector("#apiStatus .status-text");
+    if (el) el.textContent = text;
+  }
+
   let agentGreeted = false;
 
   function greet() {
     if (agentGreeted) return;
     agentGreeted = true;
-    addMsg("agent", "你好！我是知简 Agent。我已经看过你的诊断报告，随时可以提问 —— 试试下面的快捷问题，或直接输入。");
+    addMsg("agent", cloud
+      ? "你好！我是知简 Agent（已接入 AI 大模型）。我已经看过你的诊断报告，随时可以提问 —— 试试下面的快捷问题，或直接输入。"
+      : "你好！我是知简 Agent。我已经看过你的诊断报告，随时可以提问 —— 试试下面的快捷问题，或直接输入。");
+  }
+
+  /* 每日 AI 调用上限（保护额度不被刷爆），按天重置 */
+  const AI_DAILY_LIMIT = 50;
+  function aiQuotaOk() {
+    const key = "zhijian_ai_quota";
+    try {
+      const d = JSON.parse(localStorage.getItem(key) || "{}");
+      const today = new Date().toISOString().slice(0, 10);
+      if (d.date !== today) { d.date = today; d.count = 0; }
+      if (d.count >= AI_DAILY_LIMIT) return false;
+      d.count++;
+      localStorage.setItem(key, JSON.stringify(d));
+      return true;
+    } catch (e) { return true; }
   }
 
   function send(text) {
@@ -664,10 +699,37 @@
     addMsg("user", escapeHtml(q));
 
     const typing = addMsg("agent", `<span class="typing-cursor"></span>`);
-    setTimeout(() => {
+    const bubble = typing.querySelector(".msg-bubble");
+
+    if (cloud && aiQuotaOk()) {
+      sendLLM(q, bubble);
+    } else {
+      setTimeout(() => {
+        const answer = AgentEngine.reply(q, state);
+        typeOut(bubble, answer);
+        if (cloud) toast("AI 问答今日额度已用尽，已自动切换为基础问答");
+      }, 550);
+    }
+  }
+
+  async function sendLLM(q, bubble) {
+    try {
+      let acc = "";
+      await AgentEngine.replyLLM(cloud, q, state, chatHistory, (delta) => {
+        acc += delta;
+        bubble.textContent = acc;
+        chatBody.scrollTop = chatBody.scrollHeight;
+      });
+      chatHistory.push({ role: "user", content: q });
+      chatHistory.push({ role: "assistant", content: acc });
+      if (chatHistory.length > 12) chatHistory = chatHistory.slice(-12);
+      if (!acc) bubble.textContent = "（没有收到回复，请重试）";
+    } catch (err) {
+      console.warn("LLM 调用失败，降级规则引擎:", err && err.message);
+      chatHistory = [];
       const answer = AgentEngine.reply(q, state);
-      typeOut(typing.querySelector(".msg-bubble"), answer);
-    }, 550 + Math.random() * 450);
+      typeOut(bubble, answer);
+    }
   }
 
   /** 打字机效果（保留内联 HTML） */
@@ -765,5 +827,6 @@ table{width:100%;border-collapse:collapse;margin:16px 0}td,th{border:1px solid #
     Object.values(chartInstances).forEach(c => c.resize());
   });
 
+  if (cloud) setAgentStatus("AI 模型在线");
   switchView("upload");
 })();

@@ -100,6 +100,67 @@ const AgentEngine = {
 
   answerFallback(ctx) {
     return "这个问题我可以从诊断数据出发来回答。你可以试试这样问我：\n· 我最适合投什么岗位？\n· 我的技能缺口有哪些？\n· 帮我制定 4 周求职计划\n· 数据类岗位薪资行情如何？";
+  },
+
+  /**
+   * 构造 LLM 系统提示词：把诊断结果注入，让模型基于真实诊断数据回答
+   * 注意：这里只放结构化数据，不塞用户原始敏感信息
+   */
+  buildSystemPrompt(ctx) {
+    const p = ctx.profile;
+    const r = ctx.result;
+    if (!r) return "你是「知简」的求职顾问 Agent，专业、真诚、务实。请先引导用户上传简历完成诊断。";
+    const best = r.targetJob || r.jobs[0];
+    const gaps = r.gapsByJob.map(g => `${g.rank}.${g.name}(${g.label})`).join("、") || "无";
+    const top3 = r.jobs.slice(0, 3).map(j => `${j.name}[${j.score}%]`).join("、");
+    return [
+      "你是「知简」的求职顾问 Agent，为一位应届生提供简历诊断与求职建议。回答要专业、具体、真诚，不要过度夸奖，要指出真实短板。",
+      "以下是该用户的简历诊断数据（真实可信，回答请以此为准）：",
+      `- 姓名：${p.name}`,
+      `- 教育：${p.education}`,
+      `- 识别技能：${p.skills.join("、") || "未识别"}`,
+      `- 综合匹配分：${r.overall}，竞争力评级：${r.level}，约超过 ${r.rank}% 同岗位求职者`,
+      `- 目标岗位：${best.name}（${best.city} · ${best.salary}）`,
+      `- 岗位匹配 Top3：${top3}`,
+      `- 技能缺口：${gaps}`,
+      "回答要求：优先基于以上数据给建议；可结合常见求职经验补充；用中文，简洁分点；不要把用户捧上天，诚实指出差距和可执行动作。"
+    ].join("\n");
+  },
+
+  /**
+   * 用 LLM 生成回复（流式）
+   * @param {object} cloud 已初始化的 WorkBuddy 云服务客户端
+   * @param {string} question 用户问题
+   * @param {object} ctx 诊断上下文
+   * @param {Array} history 最近几轮 {role, content}
+   * @param {function} onDelta 每收到一段文本回调（用于流式渲染）
+   * @returns {Promise<string>} 完整回复文本
+   */
+  async replyLLM(cloud, question, ctx, history, onDelta) {
+    const models = await cloud.llm.models.list();
+    // 排除 auto/default 这类路由占位模型，优先选具体可用的模型
+    const usable = models.filter(m => m.disabled !== true && !/^(auto|default)$/.test(m.id || ""));
+    const model = usable[0] || models.find(m => m.disabled !== true);
+    if (!model) throw new Error("no_available_model");
+    const messages = [
+      { role: "system", content: this.buildSystemPrompt(ctx) },
+      ...(history || []).slice(-6),
+      { role: "user", content: question }
+    ];
+    let full = "";
+    for await (const chunk of cloud.llm.chat.completions.create({
+      model: model.id,
+      messages,
+      stream: true,
+      temperature: 0.7
+    })) {
+      const delta = chunk.choices && chunk.choices[0] && chunk.choices[0].delta;
+      if (delta && delta.content) {
+        full += delta.content;
+        if (onDelta) onDelta(delta.content);
+      }
+    }
+    return full;
   }
 };
 

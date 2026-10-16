@@ -85,7 +85,8 @@ const ResumeParser = {
         }
       }
       if (hits > 0) {
-        scores[std] = Math.min(95, 40 + hits * 8 + (expert ? 20 : 0));
+        // 收紧打分：命中 1-2 次为「了解」，多次 + 熟练语境才到「熟练」，避免虚高
+        scores[std] = Math.min(88, 25 + hits * 6 + (expert ? 15 : 0));
       }
     }
     return scores;
