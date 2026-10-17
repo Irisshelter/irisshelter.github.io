@@ -14,6 +14,7 @@ const ResumeParser = {
    */
   parse(text) {
     const clean = (text || "").replace(/\r/g, "").trim();
+    const school = this.extractSchoolInfo(clean);
     return {
       name: this.extractName(clean),
       education: this.extractEducation(clean),
@@ -22,8 +23,80 @@ const ResumeParser = {
       skillScores: this.extractSkillScores(clean),
       projects: this.countSections(clean, ["项目经历", "项目经验", "项目："]),
       internships: this.countSections(clean, ["实习", "工作经验", "工作经历"]),
+      // 新增：院校/学历/证书/硬门槛维度
+      school: school.school,
+      schoolLevel: school.level,   // 5=985 4=211 3=双一流/普通本科 2=专科 1=未知
+      schoolTier: school.tier,     // "985" | "211" | "双一流" | "普通本科" | "专科" | "未知"
+      degree: this.extractDegree(clean),          // "硕士"|"本科"|"大专"|""
+      degreeLevel: this.degreeToLevel(clean),     // 5=硕士 4=本科 3=大专 1=未知
+      certs: this.extractCerts(clean),
+      projectRichness: this.scoreProjectRichness(clean),
+      internRichness: this.scoreInternRichness(clean),
       wordCount: clean.replace(/\s/g, "").length
     };
+  },
+
+  /** 抽取院校与层级 */
+  extractSchoolInfo(text) {
+    const schoolMatch = text.match(/([\u4e00-\u9fa5]{4,16}(?:大学|学院|学校))/);
+    const school = schoolMatch ? schoolMatch[1] : "";
+    let level = 1, tier = "未知";
+    if (school) {
+      if (SCHOOL_TIERS["985"].some(s => school.includes(s))) { level = 5; tier = "985"; }
+      else if (SCHOOL_TIERS["211"].some(s => school.includes(s))) { level = 4; tier = "211"; }
+      else if (SCHOOL_TIERS["双一流"].some(s => school.includes(s))) { level = 3; tier = "双一流"; }
+      else if (/大学|学院/.test(school)) { level = 3; tier = "普通本科"; }
+    }
+    return { school, level, tier };
+  },
+
+  /** 抽取最高学历 */
+  extractDegree(text) {
+    if (/博士|博士研究生/.test(text)) return "博士";
+    if (/硕士|研究生/.test(text)) return "硕士";
+    if (/本科|学士/.test(text)) return "本科";
+    if (/大专|专科/.test(text)) return "大专";
+    return "";
+  },
+
+  degreeToLevel(text) {
+    if (/博士/.test(text)) return 6;
+    if (/硕士|研究生/.test(text)) return 5;
+    if (/本科|学士/.test(text)) return 4;
+    if (/大专|专科/.test(text)) return 3;
+    return 1;
+  },
+
+  /** 抽取证书 */
+  extractCerts(text) {
+    const lower = text.toLowerCase();
+    const found = [];
+    for (const c of CERT_LIBRARY) {
+      if (c.aliases.some(a => lower.includes(a.toLowerCase()))) found.push(c.name);
+    }
+    return found;
+  },
+
+  /** 项目含金量信号：数量 + 是否含技术栈/成果量化词 */
+  scoreProjectRichness(text) {
+    const projCount = this.countSections(text, ["项目经历", "项目经验", "项目："]);
+    if (!projCount) return 0;
+    const hasTech = /(hadoop|spark|python|sql|hive|mysql|echarts|机器学习|深度学习|爬虫|pandas|tensorflow|pytorch)/i.test(text);
+    const hasResult = /(提升|优化|降低|增长|效率|准确率|万条|万级|%|\d+\.\d+|获奖|立项)/.test(text);
+    let score = Math.min(3, projCount); // 数量 1-3
+    if (hasTech) score += 2;            // 有硬技术栈
+    if (hasResult) score += 2;          // 有成果量化
+    return Math.min(10, score);
+  },
+
+  /** 实习含金量：数量 + 是否相关岗位 + 时长信号 */
+  scoreInternRichness(text) {
+    const count = this.countSections(text, ["实习", "工作经验", "工作经历"]);
+    if (!count) return 0;
+    const related = /(数据|分析|运营|开发|报表|etl|bi|数据库)/i.test(text);
+    let score = Math.min(3, count);
+    if (related) score += 3;
+    return Math.min(10, score);
   },
 
   /** 抽取求职意向：「求职意向：XXX」 */

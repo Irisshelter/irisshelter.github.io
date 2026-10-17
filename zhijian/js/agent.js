@@ -52,10 +52,11 @@ const AgentEngine = {
   answerJobs(ctx) {
     const jobs = ctx.result ? ctx.result.jobs.slice(0, 3) : [];
     if (!jobs.length) return "请先上传简历完成诊断，我才能给出针对性的岗位推荐。";
-    const lines = jobs.map((j, i) =>
-      `${i + 1}. <span class="hl">${j.name}</span>（${j.city} · ${j.salary}）— 匹配度 ${j.score}%，${j.notes}`
-    ).join("\n");
-    return `根据你的技能档案，我最推荐这三个岗位：\n${lines}\n\n建议优先投递第 1 个，同时观察第 2、3 个岗位的招聘节奏。`;
+    const lines = jobs.map((j, i) => {
+      const comps = (j.companies || []).slice(0, 2).map(c => c.name).join("、");
+      return `${i + 1}. <span class="hl">${j.name}</span>（${j.city} · ${j.salary}）— 匹配度 ${j.score}%${j.isStretch ? "，<b>冲刺岗</b>" : ""}${comps ? "，可投：<span class='hl'>" + comps + "</span>" : ""}`;
+    }).join("\n");
+    return `根据你的多维诊断，全部岗位已按匹配度排序，最推荐这三个：\n${lines}\n\n建议：岗位没有「冲刺岗」标记的才是你现阶段最稳的；带标记的也可以投，但需要先补齐学历/院校/项目背书。具体企业和投递链接，到「数据市场」页看完整清单。`;
   },
 
   answerGaps(ctx) {
@@ -74,10 +75,10 @@ const AgentEngine = {
   },
 
   answerSalary(ctx) {
-    const jobs = ctx.result ? ctx.result.jobs.slice(0, 3) : [];
-    if (!jobs.length) return "请先完成简历诊断，我再结合岗位给你薪资参考。";
-    const lines = jobs.map(j => `· ${j.name}：${j.salary}`).join("\n");
-    return `结合你的匹配岗位，薪资参考区间：\n${lines}\n\n注意：应届生第一份工作，成长空间比薪资高 1-2K 更重要。`;
+    const jobs = ctx.result ? ctx.result.jobs.slice(0, 5) : [];
+    if (!jobs.length) return "请先完成简历诊断，我再结合你的硬门槛和技能给出现实薪资参考。";
+    const lines = jobs.map(j => `· ${j.name}：${j.salary}（匹配 ${j.score}%${j.isStretch ? "，冲刺岗" : ""}）`).join("\n");
+    return `结合你的院校/学历/技能，全部岗位薪资区间如下（适配度见旁）：\n${lines}\n\n提醒：10K 以上岗位普遍卡 985/211 或硕士，冲刺岗需要更强背书；先拿一个匹配岗积累经验更重要。`;
   },
 
   answerPlan(ctx) {
@@ -95,7 +96,18 @@ const AgentEngine = {
   },
 
   answerMarket() {
-    return `当前数据类岗位市场概况（模拟样本）：\n· <span class="hl">数据分析师</span>需求最旺，近 6 个月发布量持续上涨\n· JD 中提及率最高的技能：SQL（87%）、Python（78%）、Excel（72%）\n· 应届生薪资集中在 8-12K 区间\n\n结论：SQL + Python 是入行硬通货，建议优先夯实。`;
+    // 基于真实招聘数据（6362 家全方向企业）给出市场概况
+    let total = 0, totalG = 0, totalM = 0, totalW = 0;
+    if (typeof REAL_COMPANIES !== "undefined") {
+      total = REAL_COMPANIES.length;
+      REAL_COMPANIES.forEach(c => {
+        const t = c.type || "";
+        if (t.includes("国企") || t.includes("事业")) totalG++;
+        else if (t.includes("外企") || t.includes("合资")) totalW++;
+        else totalM++;
+      });
+    }
+    return `当前招聘市场概况（基于真实秋招/春招数据，共 <span class="hl">${total}</span> 家企业）：\n· 国企 ${totalG} 家 · 民企 ${totalM} 家 · 外企 ${totalW} 家\n· 覆盖数据、产品、运营、开发、设计、财务、人力、市场等全方向岗位\n· 具体可投企业与薪资，请切换上方目标岗位查看「数据市场」板块的实时匹配\n\n结论：岗位方向与对口企业会随你的简历和目标岗位动态变化，切换岗位即可看到对应企业清单。`;
   },
 
   answerFallback(ctx) {
@@ -112,18 +124,30 @@ const AgentEngine = {
     if (!r) return "你是「知简」的求职顾问 Agent，专业、真诚、务实。请先引导用户上传简历完成诊断。";
     const best = r.targetJob || r.jobs[0];
     const gaps = r.gapsByJob.map(g => `${g.rank}.${g.name}(${g.label})`).join("、") || "无";
-    const top3 = r.jobs.slice(0, 3).map(j => `${j.name}[${j.score}%]`).join("、");
+    const top3 = r.jobs.slice(0, 3).map(j => `${j.name}[${j.score}%${j.isStretch ? "·冲刺岗" : ""}]`).join("、");
+    const dims = r.dimensions;
+    const gates = r.gates && r.gates.length ? r.gates.join("；") : "无硬门槛问题";
+    // 企业投递清单（每个岗位列出前 2 家 + 类型）
+    const companyLines = r.jobs.slice(0, 4).map(j => {
+      const comps = (j.companies || []).slice(0, 2).map(c => `${c.name}(${c.type}·${c.status})`).join("、");
+      return `  ${j.name}：${comps || "暂无公开企业"}`;
+    }).join("\n");
     return [
       "你是「知简」的求职顾问 Agent，为一位应届生提供简历诊断与求职建议。回答要专业、具体、真诚，不要过度夸奖，要指出真实短板。",
-      "以下是该用户的简历诊断数据（真实可信，回答请以此为准）：",
+      "以下是该用户的简历多维诊断数据（真实可信，回答请以此为准）：",
       `- 姓名：${p.name}`,
-      `- 教育：${p.education}`,
+      `- 教育：${p.education}（${p.schoolTier || "未知"}）`,
+      `- 学历：${p.degree || "未识别"}`,
+      `- 证书：${(p.certs || []).join("、") || "无"}`,
       `- 识别技能：${p.skills.join("、") || "未识别"}`,
       `- 综合匹配分：${r.overall}，竞争力评级：${r.level}，约超过 ${r.rank}% 同岗位求职者`,
       `- 目标岗位：${best.name}（${best.city} · ${best.salary}）`,
       `- 岗位匹配 Top3：${top3}`,
       `- 技能缺口：${gaps}`,
-      "回答要求：优先基于以上数据给建议；可结合常见求职经验补充；用中文，简洁分点；不要把用户捧上天，诚实指出差距和可执行动作。"
+      `- 六维得分：技能匹配${dims.skills}、学历院校${dims.school}、项目${dims.project}、实习${dims.intern}、证书${dims.cert}、潜力${dims.potential}`,
+      `- 硬门槛体检：${gates}`,
+      `- 可投企业清单（部分）：\n${companyLines}`,
+      "回答要求：优先基于以上数据给建议；可结合常见求职经验补充；用中文，简洁分点；不要把用户捧上天，诚实指出差距（尤其是学历院校、硬门槛、技能缺口）和可执行动作。用户问企业/投递时，优先引用上面「可投企业清单」里的企业名与类型。"
     ].join("\n");
   },
 

@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>知简 · 简历智能诊断 Agent</title>
 <meta name="description" content="基于 Agentic RAG 的简历智能诊断平台：简历解析、岗位匹配、可视化诊断、AI 求职建议">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'><rect x='2' y='2' width='24' height='24' rx='7' fill='%23635BFF'/><path d='M8 9h12M8 14h12M8 19h8' stroke='white' stroke-width='2' stroke-linecap='round'/></svg>">
-<link rel="stylesheet" href="css/style.css?v=1.1.0">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'><rect x='2' y='2' width='24' height='24' rx='7' fill='%237C6CFF'/><path d='M8 9h12M8 14h12M8 19h8' stroke='white' stroke-width='2' stroke-linecap='round'/></svg>">
+<link rel="stylesheet" href="css/style.css?v=2.5.0">
 </head>
 <body>
 <!-- 动态背景层：流动光斑 + 网格点阵 -->
@@ -25,7 +25,7 @@
       <div class="logo-icon">
         <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
           <defs><linearGradient id="logoGrad" x1="0" y1="0" x2="28" y2="28">
-            <stop offset="0" stop-color="#635BFF"/><stop offset="1" stop-color="#8B5CF6"/>
+            <stop offset="0" stop-color="#7C6CFF"/><stop offset="1" stop-color="#A855F7"/>
           </linearGradient></defs>
           <rect x="2" y="2" width="24" height="24" rx="7" fill="url(#logoGrad)"/>
           <path d="M8 9h12M8 14h12M8 19h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
@@ -95,7 +95,7 @@
       <div class="upload-zone" id="uploadZone" tabindex="0">
         <input type="file" id="fileInput" accept=".txt,.md,.docx" hidden>
         <div class="upload-icon">
-          <svg viewBox="0 0 48 48" fill="none"><path d="M24 30V14m0 0l-7 7m7-7l7 7" stroke="url(#upGrad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="upGrad" x1="17" y1="14" x2="31" y2="30"><stop offset="0" stop-color="#635BFF"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient></defs><path d="M10 34v4a4 4 0 004 4h20a4 4 0 004-4v-4" stroke="#635BFF" stroke-width="3" stroke-linecap="round" opacity=".35"/></svg>
+          <svg viewBox="0 0 48 48" fill="none"><path d="M24 30V14m0 0l-7 7m7-7l7 7" stroke="url(#upGrad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="upGrad" x1="17" y1="14" x2="31" y2="30"><stop offset="0" stop-color="#7C6CFF"/><stop offset="1" stop-color="#A855F7"/></linearGradient></defs><path d="M10 34v4a4 4 0 004 4h20a4 4 0 004-4v-4" stroke="#7C6CFF" stroke-width="3" stroke-linecap="round" opacity=".35"/></svg>
         </div>
         <p class="upload-main">拖拽简历到这里，或 <em>点击选择文件</em></p>
         <p class="upload-hint">支持 .txt / .md / .docx（纯文本），也可直接粘贴简历文字</p>
@@ -152,26 +152,52 @@
       <!-- 候选人信息卡 -->
       <div class="card candidate-card" id="candidateCard"></div>
 
+      <!-- 目标岗位选择器 -->
+      <div class="card target-selector" id="targetSelectorCard" style="margin-top:20px">
+        <div class="target-selector-head">
+          <div>
+            <h3>目标岗位</h3>
+            <p class="card-sub">可切换目标岗位，切换后重新计算匹配度、技能对照与缺口诊断</p>
+          </div>
+        </div>
+        <div class="target-chips" id="targetChips"></div>
+      </div>
+
       <!-- KPI -->
       <div class="kpi-row" id="kpiRow"></div>
 
-      <!-- 可视化区 -->
+      <!-- 硬门槛诊断 -->
+      <div class="card gate-card" id="gateCard" style="margin-top:20px"></div>
+
+      <!-- 可视化区：六维得分 + 雷达 -->
       <div class="viz-row">
         <div class="card chart-card">
           <div class="card-head">
-            <h3>技能雷达图</h3>
+            <h3>六维能力雷达</h3>
             <div class="legend">
-              <span class="legend-item"><i class="dot dot-solid"></i>你的技能</span>
-              <span class="legend-item"><i class="dot dot-hollow"></i>目标岗位要求</span>
+              <span class="legend-item"><i class="dot dot-solid"></i>你的得分</span>
+              <span class="legend-item"><i class="dot dot-hollow"></i>目标线</span>
             </div>
           </div>
-          <div class="chart" id="radarChart"></div>
+          <div class="chart" id="dimRadarChart"></div>
         </div>
         <div class="card chart-card">
-          <div class="card-head"><h3>岗位匹配度</h3></div>
+          <div class="card-head"><h3>综合匹配度</h3></div>
           <div class="chart" id="gaugeChart"></div>
           <div class="match-detail" id="matchDetail"></div>
         </div>
+      </div>
+
+      <!-- 技能雷达（目标岗位要求对照） -->
+      <div class="card chart-card" style="margin-top:20px">
+        <div class="card-head">
+          <h3>目标岗位技能对照</h3>
+          <div class="legend">
+            <span class="legend-item"><i class="dot dot-solid"></i>你的技能</span>
+            <span class="legend-item"><i class="dot dot-hollow"></i>岗位要求</span>
+          </div>
+        </div>
+        <div class="chart" id="radarChart" style="height:320px"></div>
       </div>
 
       <!-- 底部区 -->
@@ -194,13 +220,6 @@
     <!-- ========== 视图：智能问答 ========== -->
     <section class="view view-agent" id="view-agent">
       <div class="agent-wrap">
-        <div class="agent-side">
-          <div class="card agent-profile" id="agentProfile"></div>
-          <div class="card agent-quick">
-            <h3>快捷提问</h3>
-            <div class="quick-list" id="quickList"></div>
-          </div>
-        </div>
         <div class="card agent-chat">
           <div class="chat-head">
             <div class="chat-avatar">
@@ -210,6 +229,11 @@
               <h3>知简 Agent</h3>
               <p><span class="online-dot"></span>基于你的诊断结果 · 随时提问</p>
             </div>
+            <div class="chat-head-spacer"></div>
+            <button class="btn btn-ghost" id="btnToggleProfile">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M3 3h10v10H3z" stroke="currentColor" stroke-width="1.5"/><path d="M3 8h10M8 3v10" stroke="currentColor" stroke-width="1.5"/></svg>
+              诊断速览
+            </button>
           </div>
           <div class="chat-body" id="chatBody"></div>
           <div class="chat-input">
@@ -219,23 +243,125 @@
             </button>
           </div>
         </div>
+
+        <!-- 抽屉式：诊断速览 + 快捷提问 -->
+        <div class="agent-drawer" id="agentDrawer">
+          <div class="drawer-handle" id="drawerHandle">
+            <svg viewBox="0 0 16 16" fill="none"><path d="M4 3l4 5-4 5M9 3l4 5-4 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="drawer-content">
+            <div class="card agent-profile" id="agentProfile"></div>
+            <div class="card agent-quick">
+              <h3>快捷提问</h3>
+              <div class="quick-list" id="quickList"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- ========== 视图：数据市场 ========== -->
+    <!-- ========== 视图：数据市场（个性化行情） ========== -->
     <section class="view view-market" id="view-market">
-      <div class="market-grid">
-        <div class="card chart-card market-wide">
-          <div class="card-head"><div><h3>岗位需求趋势</h3><p class="card-sub">数据类岗位近 6 个月发布量指数（模拟样本数据）</p></div></div>
-          <div class="chart" id="trendChart"></div>
+      <div class="market-empty" id="marketEmpty">
+        <div class="market-empty-icon">
+          <svg viewBox="0 0 48 48" fill="none"><path d="M6 38V22M17 38V12M28 38V18M39 38V8" stroke="#7C6CFF" stroke-width="3" stroke-linecap="round"/></svg>
         </div>
-        <div class="card chart-card">
-          <div class="card-head"><div><h3>技能需求热度</h3><p class="card-sub">数据分析岗 JD 中出现频率 Top 8</p></div></div>
-          <div class="chart" id="skillChart"></div>
+        <h3>还没有你的诊断数据</h3>
+        <p>个性化行情需要结合你的简历，先到「工作台」上传简历完成诊断，这里会自动生成你「够得着」的岗位薪资与竞争力分析。</p>
+        <button class="btn btn-primary" onclick="location.hash='#upload'">去上传简历</button>
+      </div>
+
+      <div class="market-content" id="marketContent" hidden>
+        <div class="market-summary" id="marketSummary"></div>
+
+        <!-- 梯队推荐企业：滚轮蒙版（横向滚动） -->
+        <div class="card tier-recommend-card">
+          <div class="card-head">
+            <div>
+              <h3>梯队推荐企业</h3>
+              <p class="card-sub">按「稳健 → 补强 → 冲刺」三梯队横向滚动推荐，切换目标岗位自动更新</p>
+            </div>
+            <div class="tier-legend">
+              <span class="legend-item"><i class="dot dot-steady"></i>稳健</span>
+              <span class="legend-item"><i class="dot dot-grow"></i>补强</span>
+              <span class="legend-item"><i class="dot dot-stretch"></i>冲刺</span>
+            </div>
+          </div>
+          <div id="tierCompanies"></div>
         </div>
-        <div class="card chart-card">
-          <div class="card-head"><div><h3>薪资分布</h3><p class="card-sub">应届数据类岗位月薪区间占比</p></div></div>
-          <div class="chart" id="salaryChart"></div>
+
+        <!-- 薪资区间可视化 -->
+        <div class="market-grid">
+          <div class="card chart-card market-wide">
+            <div class="card-head"><div><h3>你的可投递薪资区间</h3><p class="card-sub">按岗位列出薪资带，绿色=稳健可投，橙色=冲刺岗</p></div></div>
+            <div class="chart" id="mySalaryChart"></div>
+          </div>
+          <div class="card chart-card">
+            <div class="card-head"><div><h3>岗位竞争梯队</h3><p class="card-sub">稳健岗 vs 需补强 vs 冲刺岗</p></div></div>
+            <div class="chart" id="myTierChart"></div>
+          </div>
+          <div class="card chart-card">
+            <div class="card-head"><div><h3>技能缺口对薪资的影响</h3><p class="card-sub">补齐缺口能提升的岗位层级</p></div></div>
+            <div class="chart" id="myGapChart"></div>
+          </div>
+        </div>
+
+        <!-- 全部可投企业：表格 + 全局筛选 -->
+        <div class="card company-list-card">
+          <div class="card-head">
+            <div>
+              <h3>全部可投企业</h3>
+              <p class="card-sub">已按你的简历与目标岗位初筛出 <span id="allCompanyCount">0</span> 家对口企业，可继续筛选与排序</p>
+            </div>
+          </div>
+          <!-- 筛选器 -->
+          <div class="company-filter-bar">
+            <input type="text" id="companySearch" class="filter-search" placeholder="搜索企业名 / 岗位方向 / 城市…">
+            <select id="filterCat" class="filter-select"><option value="">全部方向</option></select>
+            <select id="filterNature" class="filter-select">
+              <option value="">全部性质</option>
+              <option value="国企">国企/事业</option>
+              <option value="民企">民企</option>
+              <option value="外企">外企/合资</option>
+            </select>
+            <select id="filterDegree" class="filter-select">
+              <option value="">全部学历</option>
+              <option value="本科起">本科起</option>
+              <option value="硕士起">硕士起</option>
+            </select>
+            <select id="filterCity" class="filter-select"><option value="">全部城市</option></select>
+          </div>
+          <!-- 表格 -->
+          <div class="company-table-wrap">
+            <table class="company-table" id="companyTable">
+              <colgroup>
+                <col class="col-company">
+                <col class="col-dirs">
+                <col class="col-type">
+                <col class="col-degree">
+                <col class="col-city">
+                <col class="col-deadline">
+                <col class="col-link">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th class="sortable" data-key="name">企业 <span class="sort-arrow"></span></th>
+                  <th>岗位方向</th>
+                  <th>性质</th>
+                  <th>学历</th>
+                  <th>城市</th>
+                  <th class="sortable" data-key="deadline">网申截止 <span class="sort-arrow"></span></th>
+                  <th>投递</th>
+                </tr>
+              </thead>
+              <tbody id="companyTbody"></tbody>
+            </table>
+            <div class="company-table-empty" id="companyTableEmpty" hidden>没有符合条件的记录，请调整筛选条件</div>
+          </div>
+          <div class="company-table-foot">
+            <span id="companyShown">0</span> / <span id="companyTotal">0</span> 家 · 数据更新时间随招聘周期同步
+          </div>
+          <div class="company-pagination" id="companyPagination"></div>
         </div>
       </div>
     </section>
@@ -255,12 +381,12 @@
   </div>
 </div>
 
-<script src="js/data.js?v=1.3.0"></script>
-<script src="js/parser.js?v=1.3.0"></script>
-<script src="js/scoring.js?v=1.3.0"></script>
-<script src="js/agent.js?v=1.3.0"></script>
+<script src="js/data.js?v=2.5.0"></script>
+<script src="js/parser.js?v=2.5.0"></script>
+<script src="js/scoring.js?v=2.5.0"></script>
+<script src="js/agent.js?v=2.5.0"></script>
 <script src="https://unpkg.com/@tencent-ai/workbuddy-cloud-sdk@dev/lib/index.global.js"></script>
-<script src="js/cloud-config.js?v=1.3.0"></script>
-<script src="js/app.js?v=1.3.0"></script>
+<script src="js/cloud-config.js?v=2.5.0"></script>
+<script src="js/app.js?v=2.5.0"></script>
 </body>
 </html>

@@ -1,0 +1,14 @@
+# 说明：本项目开源版使用脱敏的 cloud-config.js（占位 Key，无真实凭据）。
+# 若你在本地填入真实 Key，请勿提交该文件：
+# js/cloud-config.js
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# 临时文件
+*.tmp
+*.log

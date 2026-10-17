@@ -1,9 +1,12 @@
 /* ============================================================
- * cloud-config.js — WorkBuddy 云服务公共配置（免密钥 LLM 中转）
- * 这些是 publicConfig（本身设计为可放前端），不含任何密钥
+ * cloud-config.js — WorkBuddy 云服务公共配置（占位 Key）
+ * 这是开源版使用的占位配置，不含真实 Key。
+ * 若要启用 AI 大模型，请填写你自己的 publishableKey，
+ * 或参考 js/cloud-config.example.js。
+ * 未配置时，应用会自动降级为规则引擎问答，功能不受影响。
  * ============================================================ */
 window.CLOUD_CONFIG = {
   endpoint: "https://zhijian-73232.app.workbuddy.host",
   oauthRelayBaseUrl: "https://www.workbuddy.cn/v2/as/genie-baas/oauth",
-  publishableKey: "wbpk_HQiMkBo2MfK5mqOL6IDppl_vLMV5zwf9Rrk9meso4A3CxOs0vSDM9C4"
+  publishableKey: "在此填入你的 publishableKey"
 };
